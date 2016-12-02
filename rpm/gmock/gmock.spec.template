@@ -1,0 +1,99 @@
+Summary:        Google C++ Mocking Framework
+Name:           gmock
+Version:        {GTEST_MAJOR_VERSION}.{GTEST_MINOR_VERSION}.{GTEST_PATCH_VERSION}
+Release:        {GTEST_RELEASE_VERSION}%{?dist}
+License:        BSD
+Group:          System Environment/Libraries
+URL:            http://code.google.com/p/googlemock/
+Requires:       gtest >= 1.8.0
+
+%description
+Inspired by jMock, EasyMock, and Hamcrest, and designed with C++'s
+specifics in mind, Google C++ Mocking Framework (or Google Mock for
+short) is a library for writing and using C++ mock classes.
+
+Google Mock:
+
+ o lets you create mock classes trivially using simple macros,
+ o supports a rich set of matchers and actions,
+ o handles unordered, partially ordered, or completely ordered
+   expectations,
+ o is extensible by users, and
+ o works on Linux, Mac OS X, Windows, Windows Mobile, minGW, and
+   Symbian.
+
+%package        devel
+Summary:        Development files for %{name}
+Group:          System Environment/Libraries
+Requires:       %{name} = %{version}-%{release}
+
+%description    devel
+This package contains development files for %{name}.
+
+%install
+mkdir -pv %{buildroot}/usr/lib
+cp -rvf {ARTIFACT_DIR}/lib/libgmock*.so* %{buildroot}/usr/lib/
+
+mkdir -pv %{buildroot}/usr/include
+cp -rf {ARTIFACT_DIR}/include/gmock %{buildroot}/usr/include/
+
+mkdir -pv %{buildroot}/usr/share/cmake/Modules/
+cp -rf {SRC_DIR}/rpm/FindGMock.cmake %{buildroot}/usr/share/cmake/Modules/
+
+mkdir -pv %{buildroot}/usr/src/gmock
+cp -rf {ARTIFACT_DIR}/googlemock/src/*.cc %{buildroot}/usr/src/gmock
+
+%files
+/usr/lib/libgmock*.so*
+
+%files devel
+/usr/include/gmock/
+/usr/src/gmock/
+/usr/share/cmake/Modules/
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%changelog
+* Thu Dec 01 2016 Bram Veldhoen <bram@adiplus.nl> -
+- Adjusted for googletest 1.8.0.
+
+* Tue Nov 24 2015 Tijmen Vroegop <tvroegop@meyn.com> -
+- Templatized version based on SRPM 1-7-0-1
+
+* Wed Jul 23 2014 Terje Rosten <terje.rosten@ntnu.no> - 1.7.0-1
+- 1.7.0
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Tue Aug 6 2013 Timothy St. Clair <tstclair@redhat.com> - 1.6.0-2
+- Change package to noarch
+
+* Mon Jul 29 2013 Timothy St. Clair <tstclair@redhat.com> - 1.6.0-1
+- Update to 1.6.0 release
+
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Wed Jan 12 2011 Terje Rosten <terje.rosten@ntnu.no> - 1.5.0-1
+- 1.5.0
+- req gtest 1.5.0
+- fix description
+- fix group
+- fix files section
+- remove name macro
+- rpmlint error free
+- don't build with bundled gtest
+- make check works
+- add some buildreqs
+
+* Sun Oct 4 2009 Tejas Dinkar <tejas@gja.in> - 1.4.0-1
+- Initial gmock 1.4.0
