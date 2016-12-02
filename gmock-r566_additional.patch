@@ -1,0 +1,91 @@
+diff --git a/googletest/test/gtest-param-test_test.cc b/googletest/test/gtest-param-test_test.cc
+index 8b278bb..ed001a9 100644
+--- a/googletest/test/gtest-param-test_test.cc
++++ b/googletest/test/gtest-param-test_test.cc
+@@ -857,8 +857,8 @@ TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
+ INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
+                         CustomLambdaNamingTest,
+                         Values(std::string("LambdaName")),
+-                        [](const ::testing::TestParamInfo<std::string>& info) {
+-                          return info.param;
++                        [](const ::testing::TestParamInfo<std::string>& _info) {
++                          return _info.param;
+                         });
+ 
+ #endif  // GTEST_LANG_CXX11
+diff --git a/googletest/test/gtest_xml_output_unittest.py b/googletest/test/gtest_xml_output_unittest.py
+index f605d4e..c8f2e5f 100755
+--- a/googletest/test/gtest_xml_output_unittest.py
++++ b/googletest/test/gtest_xml_output_unittest.py
+@@ -58,7 +58,7 @@ else:
+   STACK_TRACE_TEMPLATE = ''
+ 
+ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
+-<testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
++<testsuites tests="21" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
+   </testsuite>
+@@ -69,7 +69,7 @@ Value of: 2
+ Expected: 1%(stack)s]]></failure>
+     </testcase>
+   </testsuite>
+-  <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" errors="0" time="*">
++  <testsuite name="MixedResultTest" tests="2" failures="1" disabled="1" errors="0" time="*">
+     <testcase name="Succeeds" status="run" time="*" classname="MixedResultTest"/>
+     <testcase name="Fails" status="run" time="*" classname="MixedResultTest">
+       <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Value of: 2&#x0A;Expected: 1" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+@@ -79,7 +79,6 @@ Expected: 1%(stack)s]]></failure>
+ Value of: 3
+ Expected: 2%(stack)s]]></failure>
+     </testcase>
+-    <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
+   </testsuite>
+   <testsuite name="XmlQuotingTest" tests="1" failures="1" disabled="0" errors="0" time="*">
+     <testcase name="OutputsCData" status="run" time="*" classname="XmlQuotingTest">
+@@ -95,9 +94,7 @@ Failed
+ Invalid characters in brackets []%(stack)s]]></failure>
+     </testcase>
+   </testsuite>
+-  <testsuite name="DisabledTest" tests="1" failures="0" disabled="1" errors="0" time="*">
+-    <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>
+-  </testsuite>
++  <testsuite name="DisabledTest" tests="0" failures="0" disabled="1" errors="0" time="*"/>
+   <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
+     <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest" key_1="1"/>
+     <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest" key_int="1"/>
+diff --git a/googlemock/test/gmock-generated-function-mockers_test.cc b/googlemock/test/gmock-generated-function-mockers_test.cc
+index fba0eb8..4b9f020 100644
+--- a/googlemock/test/gmock-generated-function-mockers_test.cc
++++ b/googlemock/test/gmock-generated-function-mockers_test.cc
+@@ -43,6 +43,7 @@
+ #endif  // GTEST_OS_WINDOWS
+ 
+ #include <map>
++#include <memory>
+ #include <string>
+ #include "gmock/gmock.h"
+ #include "gtest/gtest.h"
+@@ -630,8 +631,8 @@ TEST(MockFunctionTest, MoveableParameterTest) {
+     return 3;
+   }));
+   EXPECT_EQ(3, foo.Call(std::unique_ptr<int>(new int(5))));
+-  EXPECT_CALL(foo, Call(_)).WillOnce(Invoke([](std::unique_ptr<int> x) {
+-    return *x;
++  EXPECT_CALL(foo, Call(_)).WillOnce(Invoke([](std::unique_ptr<int> _x) {
++    return *_x;
+   }));
+   EXPECT_EQ(4, foo.Call(std::unique_ptr<int>(new int(4))));
+ }
+diff --git a/googlemock/test/gmock-internal-utils_test.cc b/googlemock/test/gmock-internal-utils_test.cc
+index 4f00f0d..9d5ec60 100644
+--- a/googlemock/test/gmock-internal-utils_test.cc
++++ b/googlemock/test/gmock-internal-utils_test.cc
+@@ -36,6 +36,7 @@
+ #include "gmock/internal/gmock-internal-utils.h"
+ #include <stdlib.h>
+ #include <map>
++#include <memory>
+ #include <string>
+ #include <sstream>
+ #include <vector>
