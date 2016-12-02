@@ -220,7 +220,8 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   explicit ArgsMatcherImpl(const InnerMatcher& inner_matcher)
       : inner_matcher_(SafeMatcherCast<const SelectedArgs&>(inner_matcher)) {}
 
-  virtual bool MatchAndExplain(ArgsTuple args,
+  virtual bool MatchAndExplain(const
+      GTEST_REMOVE_REFERENCE_AND_CONST_(ArgsTuple)& args,
                                MatchResultListener* listener) const {
     const SelectedArgs& selected_args = GetSelectedArgs(args);
     if (!listener->IsInterested())
@@ -1387,7 +1388,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       gmock_Impl()\
            {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1421,7 +1423,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   }\
   template <typename arg_type>\
   bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1435,7 +1437,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       explicit gmock_Impl(p0##_type gmock_p0)\
            : p0(gmock_p0) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1473,7 +1476,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   template <typename p0##_type>\
   template <typename arg_type>\
   bool name##MatcherP<p0##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1487,7 +1490,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1)\
            : p0(gmock_p0), p1(gmock_p1) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1530,7 +1534,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   template <typename arg_type>\
   bool name##MatcherP2<p0##_type, \
       p1##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1544,7 +1548,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2)\
            : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1590,7 +1595,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   template <typename arg_type>\
   bool name##MatcherP3<p0##_type, p1##_type, \
       p2##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1606,7 +1611,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
           p3##_type gmock_p3)\
            : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1659,7 +1665,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   template <typename arg_type>\
   bool name##MatcherP4<p0##_type, p1##_type, p2##_type, \
       p3##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1676,7 +1682,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
            : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
                p4(gmock_p4) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1732,7 +1739,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   template <typename arg_type>\
   bool name##MatcherP5<p0##_type, p1##_type, p2##_type, p3##_type, \
       p4##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1749,7 +1756,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
            : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
                p4(gmock_p4), p5(gmock_p5) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1807,7 +1815,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   template <typename arg_type>\
   bool name##MatcherP6<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1826,7 +1834,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
            : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
                p4(gmock_p4), p5(gmock_p5), p6(gmock_p6) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1891,7 +1900,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   template <typename arg_type>\
   bool name##MatcherP7<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type, p6##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1910,7 +1919,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
            : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
                p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -1980,7 +1990,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   bool name##MatcherP8<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type, p6##_type, \
       p7##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -2000,7 +2010,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
                p8(gmock_p8) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -2073,7 +2084,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   bool name##MatcherP9<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type, p6##_type, p7##_type, \
       p8##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -2095,7 +2106,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
                p8(gmock_p8), p9(gmock_p9) {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
+              ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -2172,7 +2184,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   bool name##MatcherP10<p0##_type, p1##_type, p2##_type, p3##_type, \
       p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
       p9##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 

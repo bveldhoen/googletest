@@ -206,7 +206,10 @@
 //
 // C++11 feature wrappers:
 //
-//   testing::internal::move  - portability wrapper for std::move.
+//   testing::internal::move    - portability wrapper for std::move.
+//   testing::internal::forward - portability wrapper for std::forward.
+//   GTEST_RVALUE_REF_          - portability wrapper for r-value references
+//                                (or const l-value references if not C++11)
 //
 // Synchronization:
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
@@ -323,7 +326,9 @@
 // -std={c,gnu}++{0x,11} is passed.  The C++11 standard specifies a
 // value for __cplusplus, and recent versions of clang, gcc, and
 // probably other compilers set that too in C++11 mode.
-# if __GXX_EXPERIMENTAL_CXX0X__ || __cplusplus >= 201103L
+// Unfortunately Visual Studio still (as of version 2013) reports
+// 199711L, but it supports most of C++11 features.
+# if __GXX_EXPERIMENTAL_CXX0X__ || __cplusplus >= 201103L || _MSC_VER >= 1800
 // Compiling in at least C++11 mode.
 #  define GTEST_LANG_CXX11 1
 # else
@@ -358,6 +363,8 @@
 # define GTEST_HAS_STD_FUNCTION_ 1
 # define GTEST_HAS_STD_INITIALIZER_LIST_ 1
 # define GTEST_HAS_STD_MOVE_ 1
+# define GTEST_HAS_STD_FORWARD_ 1
+# define GTEST_HAS_RVALUE_REF_ 1
 # define GTEST_HAS_STD_SHARED_PTR_ 1
 # define GTEST_HAS_STD_TYPE_TRAITS_ 1
 # define GTEST_HAS_STD_UNIQUE_PTR_ 1
@@ -725,7 +732,7 @@ using ::std::tuple_size;
 #  define BOOST_TR1_DETAIL_CONFIG_HPP_INCLUDED
 #  include <tuple>  // IWYU pragma: export  // NOLINT
 
-# elif defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+# elif defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000) && (__cplusplus < 201103L)
 // GCC 4.0+ implements tr1/tuple in the <tr1/tuple> header.  This does
 // not conform to the TR1 spec, which requires the header to be <tuple>.
 
@@ -1328,6 +1335,21 @@ const T& move(const T& t) {
   return t;
 }
 #endif  // GTEST_HAS_STD_MOVE_
+
+#if GTEST_HAS_STD_FORWARD_
+using std::forward;
+#else  // GTEST_HAS_STD_FORWARD_
+template <typename T>
+const T& forward(const T& t) {
+  return t;
+}
+#endif  // GTEST_HAS_STD_FORWARD_
+
+#if GTEST_HAS_RVALUE_REF_
+# define GTEST_RVALUE_REF_(...) __VA_ARGS__&& // NOLINT
+#else  // GTEST_HAS_RVALUE_REF_
+# define GTEST_RVALUE_REF_(...) const __VA_ARGS__& // NOLINT
+#endif  // GTEST_HAS_RVALUE_REF_
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //

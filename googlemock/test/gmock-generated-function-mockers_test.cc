@@ -618,5 +618,24 @@ TEST(MockFunctionTest, AsStdFunctionReturnsReference) {
 }
 #endif  // GTEST_HAS_STD_FUNCTION_
 
+#if GTEST_LANG_CXX11
+TEST(MockFunctionTest, MoveableParameterTest) {
+  MockFunction<int(std::unique_ptr<int>)> foo;
+  EXPECT_CALL(foo, Call(_)).WillOnce(Return(1));
+  EXPECT_EQ(1, foo.Call(std::unique_ptr<int>(new int(5))));
+  EXPECT_CALL(foo, Call(_)).WillOnce(Return(2));
+  std::unique_ptr<int> x(new int(5));
+  EXPECT_EQ(2, foo.Call(std::move(x)));
+  EXPECT_CALL(foo, Call(_)).WillOnce(InvokeWithoutArgs([]() {
+    return 3;
+  }));
+  EXPECT_EQ(3, foo.Call(std::unique_ptr<int>(new int(5))));
+  EXPECT_CALL(foo, Call(_)).WillOnce(Invoke([](std::unique_ptr<int> x) {
+    return *x;
+  }));
+  EXPECT_EQ(4, foo.Call(std::unique_ptr<int>(new int(4))));
+}
+#endif  // GTEST_LANG_CXX11
+
 }  // namespace gmock_generated_function_mockers_test
 }  // namespace testing

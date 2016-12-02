@@ -173,7 +173,7 @@ class MatcherInterface : public MatcherDescriberInterface {
   // can talk to 'listener' without checking its validity first.
   // However, in order to implement dummy listeners efficiently,
   // listener->stream() may be NULL.
-  virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const = 0;
 
   // Inherits these methods from MatcherDescriberInterface:
   //   virtual void DescribeTo(::std::ostream* os) const = 0;
@@ -253,12 +253,12 @@ class MatcherBase {
  public:
   // Returns true iff the matcher matches x; also explains the match
   // result to 'listener'.
-  bool MatchAndExplain(T x, MatchResultListener* listener) const {
+  bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const {
     return impl_->MatchAndExplain(x, listener);
   }
 
   // Returns true iff this matcher matches x.
-  bool Matches(T x) const {
+  bool Matches(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x) const {
     DummyMatchResultListener dummy;
     return MatchAndExplain(x, &dummy);
   }
@@ -272,7 +272,7 @@ class MatcherBase {
   }
 
   // Explains why x matches, or doesn't match, the matcher.
-  void ExplainMatchResultTo(T x, ::std::ostream* os) const {
+  void ExplainMatchResultTo(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, ::std::ostream* os) const {
     StreamMatchResultListener listener(os);
     MatchAndExplain(x, &listener);
   }
@@ -458,7 +458,7 @@ class PolymorphicMatcher {
       impl_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const {
       return impl_.MatchAndExplain(x, listener);
     }
 
@@ -573,8 +573,8 @@ class MatcherCastImpl<T, Matcher<U> > {
         : source_matcher_(source_matcher) {}
 
     // We delegate the matching logic to the source matcher.
-    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
-      return source_matcher_.MatchAndExplain(static_cast<U>(x), listener);
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const {
+      return source_matcher_.MatchAndExplain(x, listener);
     }
 
     virtual void DescribeTo(::std::ostream* os) const {
@@ -751,7 +751,7 @@ class TuplePrefix {
     typename tuple_element<N - 1, MatcherTuple>::type matcher =
         get<N - 1>(matchers);
     typedef typename tuple_element<N - 1, ValueTuple>::type Value;
-    Value value = get<N - 1>(values);
+    const GTEST_REMOVE_REFERENCE_AND_CONST_(Value)& value = get<N - 1>(values);
     StringMatchResultListener listener;
     if (!matcher.MatchAndExplain(value, &listener)) {
       // TODO(wan): include in the message the name of the parameter
@@ -859,7 +859,7 @@ template <typename T>
 class AnyMatcherImpl : public MatcherInterface<T> {
  public:
   virtual bool MatchAndExplain(
-      T /* x */, MatchResultListener* /* listener */) const { return true; }
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& /* x */, MatchResultListener* /* listener */) const { return true; }
   virtual void DescribeTo(::std::ostream* os) const { *os << "is anything"; }
   virtual void DescribeNegationTo(::std::ostream* os) const {
     // This is mostly for completeness' safe, as it's not very useful
@@ -904,7 +904,7 @@ class ComparisonBase {
    public:
     explicit Impl(const Rhs& rhs) : rhs_(rhs) {}
     virtual bool MatchAndExplain(
-        Lhs lhs, MatchResultListener* /* listener */) const {
+        const GTEST_REMOVE_REFERENCE_AND_CONST_(Lhs)& lhs, MatchResultListener* /* listener */) const {
       return Op()(lhs, rhs_);
     }
     virtual void DescribeTo(::std::ostream* os) const {
@@ -1057,10 +1057,8 @@ class RefMatcher<T&> {
    public:
     explicit Impl(Super& x) : object_(x) {}  // NOLINT
 
-    // MatchAndExplain() takes a Super& (as opposed to const Super&)
-    // in order to match the interface MatcherInterface<Super&>.
     virtual bool MatchAndExplain(
-        Super& x, MatchResultListener* listener) const {
+        const Super& x, MatchResultListener* listener) const {
       *listener << "which is located @" << static_cast<const void*>(&x);
       return &x == &object_;
     }
@@ -1398,7 +1396,7 @@ class PairMatchBase {
   class Impl : public MatcherInterface<Tuple> {
    public:
     virtual bool MatchAndExplain(
-        Tuple args,
+        const GTEST_REMOVE_REFERENCE_AND_CONST_(Tuple)& args,
         MatchResultListener* /* listener */) const {
       return Op()(::testing::get<0>(args), ::testing::get<1>(args));
     }
@@ -1446,7 +1444,7 @@ class NotMatcherImpl : public MatcherInterface<T> {
   explicit NotMatcherImpl(const Matcher<T>& matcher)
       : matcher_(matcher) {}
 
-  virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const {
     return !matcher_.MatchAndExplain(x, listener);
   }
 
@@ -1510,7 +1508,7 @@ class BothOfMatcherImpl : public MatcherInterface<T> {
     *os << ")";
   }
 
-  virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const {
     // If either matcher1_ or matcher2_ doesn't match x, we only need
     // to explain why one of them fails.
     StringMatchResultListener listener1;
@@ -1682,7 +1680,7 @@ class EitherOfMatcherImpl : public MatcherInterface<T> {
     *os << ")";
   }
 
-  virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const {
     // If either matcher1_ or matcher2_ matches x, we just need to
     // explain why *one* of them matches.
     StringMatchResultListener listener1;
@@ -1918,7 +1916,7 @@ class FloatingEqMatcher {
           nan_eq_nan_(nan_eq_nan),
           max_abs_error_(max_abs_error) {}
 
-    virtual bool MatchAndExplain(T value,
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& value,
                                  MatchResultListener* listener) const {
       const FloatingPoint<FloatType> actual(value), expected(expected_);
 
@@ -2078,7 +2076,7 @@ class PointeeMatcher {
       matcher_.DescribeTo(os);
     }
 
-    virtual bool MatchAndExplain(Pointer pointer,
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(Pointer)& pointer,
                                  MatchResultListener* listener) const {
       if (GetRawPointer(pointer) == NULL)
         return false;
@@ -2367,12 +2365,12 @@ class ResultOfMatcher {
       matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(T obj, MatchResultListener* listener) const {
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& obj, MatchResultListener* listener) const {
       *listener << "which is mapped by the given callable to ";
       // Cannot pass the return value (for example, int) to
       // MatchPrintAndExplain, which takes a non-const reference as argument.
       ResultType result =
-          CallableTraits<Callable>::template Invoke<T>(callable_, obj);
+        CallableTraits<Callable>::template Invoke<const GTEST_REMOVE_REFERENCE_AND_CONST_(T)&>(callable_, obj);
       return MatchPrintAndExplain(result, matcher_, listener);
     }
 
@@ -2425,7 +2423,7 @@ class SizeIsMatcher {
       size_matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(Container container,
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(Container)& container,
                                  MatchResultListener* listener) const {
       SizeType size = container.size();
       StringMatchResultListener size_listener;
@@ -2479,7 +2477,7 @@ class BeginEndDistanceIsMatcher {
       distance_matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(Container container,
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(Container)& container,
                                  MatchResultListener* listener) const {
 #if GTEST_HAS_STD_BEGIN_AND_END_
       using std::begin;
@@ -2646,7 +2644,7 @@ class WhenSortedByMatcher {
       matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(LhsContainer lhs,
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)& lhs,
                                  MatchResultListener* listener) const {
       LhsStlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
       ::std::vector<LhsValue> sorted_container(lhs_stl_container.begin(),
@@ -2746,7 +2744,7 @@ class PointwiseMatcher {
       mono_tuple_matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(LhsContainer lhs,
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)& lhs,
                                  MatchResultListener* listener) const {
       LhsStlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
       const size_t actual_size = lhs_stl_container.size();
@@ -2859,7 +2857,7 @@ class ContainsMatcherImpl : public QuantifierMatcherImpl<Container> {
     this->inner_matcher_.DescribeTo(os);
   }
 
-  virtual bool MatchAndExplain(Container container,
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(Container)& container,
                                MatchResultListener* listener) const {
     return this->MatchAndExplainImpl(false, container, listener);
   }
@@ -2888,7 +2886,7 @@ class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
     this->inner_matcher_.DescribeNegationTo(os);
   }
 
-  virtual bool MatchAndExplain(Container container,
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(Container)& container,
                                MatchResultListener* listener) const {
     return this->MatchAndExplainImpl(true, container, listener);
   }
@@ -2948,7 +2946,7 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
   }
 
   // Returns true iff 'key_value.first' (the key) matches the inner matcher.
-  virtual bool MatchAndExplain(PairType key_value,
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(PairType)& key_value,
                                MatchResultListener* listener) const {
     StringMatchResultListener inner_listener;
     const bool match = inner_matcher_.MatchAndExplain(key_value.first,
@@ -3030,7 +3028,7 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
 
   // Returns true iff 'a_pair.first' matches first_matcher and 'a_pair.second'
   // matches second_matcher.
-  virtual bool MatchAndExplain(PairType a_pair,
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(PairType)& a_pair,
                                MatchResultListener* listener) const {
     if (!listener->IsInterested()) {
       // If the listener is not interested, we don't need to construct the
@@ -3158,7 +3156,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
     }
   }
 
-  virtual bool MatchAndExplain(Container container,
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(Container)& container,
                                MatchResultListener* listener) const {
     // To work with stream-like "containers", we must only walk
     // through the elements in one pass.
@@ -3373,7 +3371,7 @@ class UnorderedElementsAreMatcherImpl
     return UnorderedElementsAreMatcherImplBase::DescribeNegationToImpl(os);
   }
 
-  virtual bool MatchAndExplain(Container container,
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(Container)& container,
                                MatchResultListener* listener) const {
     StlContainerReference stl_container = View::ConstReference(container);
     ::std::vector<string> element_printouts;
@@ -3588,7 +3586,7 @@ class BoundSecondMatcher {
       mono_tuple2_matcher_.DescribeTo(os);
     }
 
-    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+    virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(T)& x, MatchResultListener* listener) const {
       return mono_tuple2_matcher_.MatchAndExplain(ArgTuple(x, second_value_),
                                                   listener);
     }

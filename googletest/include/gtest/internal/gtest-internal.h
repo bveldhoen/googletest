@@ -76,6 +76,9 @@
 #define GTEST_CONCAT_TOKEN_(foo, bar) GTEST_CONCAT_TOKEN_IMPL_(foo, bar)
 #define GTEST_CONCAT_TOKEN_IMPL_(foo, bar) foo ## bar
 
+#define GTEST_STRINGIFY_TOKEN_(a) GTEST_STRINGIFY_TOKEN_IMPL_(a)
+#define GTEST_STRINGIFY_TOKEN_IMPL_(a) #a
+
 class ProtocolMessage;
 namespace proto2 { class Message; }
 
@@ -1225,7 +1228,8 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
 ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name, test_name)\
   ::test_info_ =\
     ::testing::internal::MakeAndRegisterTestInfo(\
-        #test_case_name, #test_name, NULL, NULL, \
+        GTEST_STRINGIFY_TOKEN_(test_case_name), \
+        GTEST_STRINGIFY_TOKEN_(test_name), NULL, NULL, \
         ::testing::internal::CodeLocation(__FILE__, __LINE__), \
         (parent_id), \
         parent_class::SetUpTestCase, \

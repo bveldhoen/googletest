@@ -57,8 +57,8 @@ class InvokeAction {
       : function_impl_(function_impl) {}
 
   template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    return InvokeHelper<Result, ArgumentTuple>::Invoke(function_impl_, args);
+  Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) {
+    return InvokeHelper<Result, ArgumentTuple>::Invoke(function_impl_, ::testing::internal::move(args));
   }
 
  private:
@@ -75,9 +75,9 @@ class InvokeMethodAction {
       : method_ptr_(method_ptr), obj_ptr_(obj_ptr) {}
 
   template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) const {
+  Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) const {
     return InvokeHelper<Result, ArgumentTuple>::InvokeMethod(
-        obj_ptr_, method_ptr_, args);
+        obj_ptr_, method_ptr_, ::testing::internal::move(args));
   }
 
  private:

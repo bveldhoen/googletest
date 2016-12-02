@@ -368,7 +368,7 @@ TEST(WithArgsTest, TenArgs) {
 // Tests using WithArgs with an action that is not Invoke().
 class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
  public:
-  virtual int Perform(const tuple<int, int>& args) {
+  virtual int Perform(GTEST_RVALUE_REF_(tuple<int, int>) args) {
     return get<0>(args) - get<1>(args);
   }
 };
@@ -986,22 +986,21 @@ ACTION_P10(Plus10, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
 
 TEST(ActionPnMacroTest, CanExplicitlyInstantiateWithReferenceTypes) {
   int x = 1, y = 2, z = 3;
-  const tuple<> empty = make_tuple();
 
   Action<int()> a = Plus1<int&>(x);
-  EXPECT_EQ(1, a.Perform(empty));
+  EXPECT_EQ(1, a.Perform(make_tuple()));
 
   a = Plus2<const int&, int&>(x, y);
-  EXPECT_EQ(3, a.Perform(empty));
+  EXPECT_EQ(3, a.Perform(make_tuple()));
 
   a = Plus3<int&, const int&, int&>(x, y, z);
-  EXPECT_EQ(6, a.Perform(empty));
+  EXPECT_EQ(6, a.Perform(make_tuple()));
 
   int n[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
   a = Plus10<const int&, int&, const int&, int&, const int&, int&, const int&,
       int&, const int&, int&>(n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
                               n[8], n[9]);
-  EXPECT_EQ(55, a.Perform(empty));
+  EXPECT_EQ(55, a.Perform(make_tuple()));
 }
 
 class NullaryConstructorClass {

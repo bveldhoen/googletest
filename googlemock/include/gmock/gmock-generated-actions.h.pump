@@ -61,19 +61,19 @@ $range j 1..i
 $var types = [[$for j [[, typename A$j]]]]
 $var as = [[$for j, [[A$j]]]]
 $var args = [[$if i==0 [[]] $else [[ args]]]]
-$var gets = [[$for j, [[get<$(j - 1)>(args)]]]]
+$var gets = [[$for j, [[::testing::internal::forward<A$j> (get<$(j - 1)>(args))]]]]
 template <typename R$types>
 class InvokeHelper<R, ::testing::tuple<$as> > {
  public:
   template <typename Function>
-  static R Invoke(Function function, const ::testing::tuple<$as>&$args) {
+  static R Invoke(Function function, GTEST_RVALUE_REF_(::testing::tuple<$as>) $args) {
            return function($gets);
   }
 
   template <class Class, typename MethodPtr>
   static R InvokeMethod(Class* obj_ptr,
                         MethodPtr method_ptr,
-                        const ::testing::tuple<$as>&$args) {
+                        GTEST_RVALUE_REF_(::testing::tuple<$as>) $args) {
            return (obj_ptr->*method_ptr)($gets);
   }
 };
@@ -110,8 +110,8 @@ class SelectArgs {
  public:
   typedef Result type($for i, [[GMOCK_FIELD_(ArgumentTuple, k$i)]]);
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
-  static SelectedArgs Select(const ArgumentTuple& args) {
-    return SelectedArgs($for i, [[get<k$i>(args)]]);
+  static SelectedArgs Select(GTEST_RVALUE_REF_(ArgumentTuple) args) {
+    return SelectedArgs($for i, [[get<k$i>(::testing::internal::move(args))]]);
   }
 };
 
@@ -125,9 +125,9 @@ class SelectArgs<Result, ArgumentTuple,
  public:
   typedef Result type($for j1, [[GMOCK_FIELD_(ArgumentTuple, k$j1)]]);
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
-  static SelectedArgs Select(const ArgumentTuple& [[]]
+  static SelectedArgs Select(GTEST_RVALUE_REF_(ArgumentTuple) [[]]
 $if i == 1 [[/* args */]] $else [[args]]) {
-    return SelectedArgs($for j1, [[get<k$j1>(args)]]);
+    return SelectedArgs($for j1, [[::testing::internal::forward<GMOCK_FIELD_(ArgumentTuple, k$j1)>(get<k$j1>(args))]]);
   }
 };
 
@@ -155,8 +155,8 @@ class WithArgsAction {
 
     explicit Impl(const InnerAction& action) : action_(action) {}
 
-    virtual Result Perform(const ArgumentTuple& args) {
-      return action_.Perform(SelectArgs<Result, ArgumentTuple, $ks>::Select(args));
+    virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) {
+      return action_.Perform(SelectArgs<Result, ArgumentTuple, $ks>::Select(::testing::internal::move(args)));
     }
 
    private:
@@ -206,8 +206,8 @@ $range k 1..n-i
 $var eas = [[$for k, [[ExcessiveArg()]]]]
 $var arg_list = [[$if (i==0) | (i==n) [[$as$eas]] $else [[$as, $eas]]]]
 $template
-  static Result Perform(Impl* impl, const ::testing::tuple<$As>& args) {
-    return impl->template gmock_PerformImpl<$As>(args, $arg_list);
+  static Result Perform(Impl* impl, GTEST_RVALUE_REF_(::testing::tuple<$As>) args) {
+    return impl->template gmock_PerformImpl<$As>(::testing::internal::move(args), $arg_list);
   }
 
 ]]
@@ -364,7 +364,7 @@ $range k 0..n-1
 
 // An internal macro needed for implementing ACTION*().
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
-    const args_type& args GTEST_ATTRIBUTE_UNUSED_
+    GTEST_RVALUE_REF_(args_type) args GTEST_ATTRIBUTE_UNUSED_
 $for k [[, \
     arg$k[[]]_type arg$k GTEST_ATTRIBUTE_UNUSED_]]
 
@@ -562,12 +562,12 @@ $range k 0..n-1
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       explicit gmock_Impl GMOCK_INTERNAL_INIT_##value_params {}\
-      virtual return_type Perform(const args_type& args) {\
+      virtual return_type Perform(GTEST_RVALUE_REF_(args_type) args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
-            Perform(this, args);\
+            Perform(this, ::testing::internal::move(args));\
       }\
       template <$for k, [[typename arg$k[[]]_type]]>\
-      return_type gmock_PerformImpl(const args_type& args[[]]
+      return_type gmock_PerformImpl(GTEST_RVALUE_REF_(args_type) args[[]]
 $for k [[, arg$k[[]]_type arg$k]]) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
      private:\
@@ -649,12 +649,12 @@ $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       [[$if i==1 [[explicit ]]]]gmock_Impl($ctor_param_list)$inits {}\
-      virtual return_type Perform(const args_type& args) {\
+      virtual return_type Perform(GTEST_RVALUE_REF_(args_type) args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
-            Perform(this, args);\
+            Perform(this, ::testing::internal::move(args));\
       }\
       template <$typename_arg_types>\
-      return_type gmock_PerformImpl(const args_type& args, [[]]
+      return_type gmock_PerformImpl(GTEST_RVALUE_REF_(args_type) args, [[]]
 $arg_types_and_names) const;\$param_field_decls
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\

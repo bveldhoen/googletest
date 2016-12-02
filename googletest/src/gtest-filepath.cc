@@ -54,8 +54,10 @@
 # define GTEST_PATH_MAX_ PATH_MAX
 #elif defined(_XOPEN_PATH_MAX)
 # define GTEST_PATH_MAX_ _XOPEN_PATH_MAX
-#else
+#elif defined(_POSIX_PATH_MAX)
 # define GTEST_PATH_MAX_ _POSIX_PATH_MAX
+#else
+# define GTEST_PATH_MAX_ 255
 #endif  // GTEST_OS_WINDOWS
 
 #include "gtest/internal/gtest-string.h"

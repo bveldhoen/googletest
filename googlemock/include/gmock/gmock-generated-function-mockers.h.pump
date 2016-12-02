@@ -68,7 +68,7 @@ $for i [[
 $range j 1..i
 $var typename_As = [[$for j [[, typename A$j]]]]
 $var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[a$j]]]]
+$var as = [[$for j, [[::testing::internal::forward<A$j>(a$j)]]]]
 $var Aas = [[$for j, [[A$j a$j]]]]
 $var ms = [[$for j, [[m$j]]]]
 $var matchers = [[$for j, [[const Matcher<A$j>& m$j]]]]
@@ -137,6 +137,7 @@ $range j 1..i
 $var arg_as = [[$for j, \
       [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var as = [[$for j, [[gmock_a$j]]]]
+$var rval_as = [[$for j, [[::testing::internal::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
 $var matcher_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
@@ -147,7 +148,7 @@ $var matcher_as = [[$for j, \
         tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_($i, constness, Method).Invoke($as); \
+    return GMOCK_MOCKER_($i, constness, Method).Invoke($rval_as); \
   } \
   ::testing::MockSpec<__VA_ARGS__>& \
       gmock_##Method($matcher_as) constness { \
@@ -263,7 +264,7 @@ class MockFunction;
 $for i [[
 $range j 0..i-1
 $var ArgTypes = [[$for j, [[A$j]]]]
-$var ArgNames = [[$for j, [[a$j]]]]
+$var ArgNames = [[$for j, [[::testing::internal::forward<A$j>(a$j)]]]]
 $var ArgDecls = [[$for j, [[A$j a$j]]]]
 template <typename R$for j [[, typename A$j]]>
 class MockFunction<R($ArgTypes)> {
