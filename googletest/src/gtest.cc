@@ -3625,6 +3625,10 @@ void XmlUnitTestResultPrinter::OutputXmlAttribute(
 void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
                                                  const char* test_case_name,
                                                  const TestInfo& test_info) {
+  if (!test_info.should_run()) {
+    return;
+  }
+
   const TestResult& result = *test_info.result();
   const std::string kTestcase = "testcase";
 
@@ -3678,7 +3682,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(std::ostream* stream,
   *stream << "  <" << kTestsuite;
   OutputXmlAttribute(stream, kTestsuite, "name", test_case.name());
   OutputXmlAttribute(stream, kTestsuite, "tests",
-                     StreamableToString(test_case.reportable_test_count()));
+                     StreamableToString(test_case.test_to_run_count()));
   OutputXmlAttribute(stream, kTestsuite, "failures",
                      StreamableToString(test_case.failed_test_count()));
   OutputXmlAttribute(
@@ -3706,7 +3710,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   *stream << "<" << kTestsuites;
 
   OutputXmlAttribute(stream, kTestsuites, "tests",
-                     StreamableToString(unit_test.reportable_test_count()));
+                     StreamableToString(unit_test.test_to_run_count()));
   OutputXmlAttribute(stream, kTestsuites, "failures",
                      StreamableToString(unit_test.failed_test_count()));
   OutputXmlAttribute(

@@ -373,7 +373,7 @@ typedef int MyGlobalFunction(bool, int);
 
 class MyActionImpl : public ActionInterface<MyGlobalFunction> {
  public:
-  virtual int Perform(const tuple<bool, int>& args) {
+  virtual int Perform(GTEST_RVALUE_REF_(tuple<bool, int>) args) {
     return get<0>(args) ? get<1>(args) : 0;
   }
 };
@@ -437,7 +437,7 @@ TEST(ActionTest, IsCopyable) {
 
 class IsNotZero : public ActionInterface<bool(int)> {  // NOLINT
  public:
-  virtual bool Perform(const tuple<int>& arg) {
+  virtual bool Perform(GTEST_RVALUE_REF_(tuple<int>) arg) {
     return get<0>(arg) != 0;
   }
 };
@@ -466,7 +466,7 @@ class ReturnSecondArgumentAction {
   // polymorphic action whose Perform() method template is either
   // const or not.  This lets us verify the non-const case.
   template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) { return get<1>(args); }
+  Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) { return get<1>(args); }
 };
 
 // Implements a polymorphic action that can be used in a nullary

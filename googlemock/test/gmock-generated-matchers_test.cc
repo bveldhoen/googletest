@@ -228,7 +228,7 @@ class LessThanMatcher : public MatcherInterface<tuple<char, int> > {
  public:
   virtual void DescribeTo(::std::ostream* os) const {}
 
-  virtual bool MatchAndExplain(tuple<char, int> value,
+  virtual bool MatchAndExplain(const tuple<char, int>& value,
                                MatchResultListener* listener) const {
     const int diff = get<0>(value) - get<1>(value);
     if (diff > 0) {
@@ -261,7 +261,7 @@ class GreaterThanMatcher : public MatcherInterface<int> {
     *os << "is greater than " << rhs_;
   }
 
-  virtual bool MatchAndExplain(int lhs,
+  virtual bool MatchAndExplain(const int& lhs,
                                MatchResultListener* listener) const {
     const int diff = lhs - rhs_;
     if (diff > 0) {

@@ -148,7 +148,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // action fails.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformDefaultAction(
-      const void* untyped_args,
+      void* untyped_args,
       const string& call_description) const = 0;
 
   // Performs the given action with the given arguments and returns
@@ -156,7 +156,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformAction(
       const void* untyped_action,
-      const void* untyped_args) const = 0;
+      void* untyped_args) const = 0;
 
   // Writes a message that the call is uninteresting (i.e. neither
   // explicitly expected nor explicitly unexpected) to the given
@@ -212,7 +212,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // threads concurrently.  The caller is responsible for deleting the
   // result.
   UntypedActionResultHolderBase* UntypedInvokeWith(
-      const void* untyped_args)
+      void* untyped_args)
           GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
  protected:
@@ -1306,6 +1306,11 @@ class ReferenceOrValueWrapper {
       : value_(::testing::internal::move(value)) {
   }
 
+#ifdef GTEST_LANG_CXX11
+  ReferenceOrValueWrapper(ReferenceOrValueWrapper<T>&& other)
+      : value_(::testing::internal::move(other.value_)) {}
+#endif
+
   // Unwraps and returns the underlying value/reference, exactly as
   // originally passed. The behavior of calling this more than once on
   // the same object is unspecified.
@@ -1388,10 +1393,10 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
   template <typename F>
   static ActionResultHolder* PerformDefaultAction(
       const FunctionMockerBase<F>* func_mocker,
-      const typename Function<F>::ArgumentTuple& args,
+	  GTEST_RVALUE_REF_(typename Function<F>::ArgumentTuple) args,
       const string& call_description) {
     return new ActionResultHolder(Wrapper(
-        func_mocker->PerformDefaultAction(args, call_description)));
+        func_mocker->PerformDefaultAction(::testing::internal::move(args), call_description)));
   }
 
   // Performs the given action and returns the result in a new-ed
@@ -1399,8 +1404,8 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
   template <typename F>
   static ActionResultHolder*
   PerformAction(const Action<F>& action,
-                const typename Function<F>::ArgumentTuple& args) {
-    return new ActionResultHolder(Wrapper(action.Perform(args)));
+                 GTEST_RVALUE_REF_(typename Function<F>::ArgumentTuple) args) {
+    return new ActionResultHolder(Wrapper(action.Perform(::testing::internal::move(args))));
   }
 
  private:
@@ -1428,9 +1433,9 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
   template <typename F>
   static ActionResultHolder* PerformDefaultAction(
       const FunctionMockerBase<F>* func_mocker,
-      const typename Function<F>::ArgumentTuple& args,
+       GTEST_RVALUE_REF_(typename Function<F>::ArgumentTuple) args,
       const string& call_description) {
-    func_mocker->PerformDefaultAction(args, call_description);
+	func_mocker->PerformDefaultAction(::testing::internal::move(args), call_description);
     return new ActionResultHolder;
   }
 
@@ -1439,8 +1444,8 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
   template <typename F>
   static ActionResultHolder* PerformAction(
       const Action<F>& action,
-      const typename Function<F>::ArgumentTuple& args) {
-    action.Perform(args);
+       GTEST_RVALUE_REF_(typename Function<F>::ArgumentTuple) args) {
+    action.Perform(::testing::internal::move(args));
     return new ActionResultHolder;
   }
 
@@ -1495,12 +1500,12 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // mutable state of this object, and thus can be called concurrently
   // without locking.
   // L = *
-  Result PerformDefaultAction(const ArgumentTuple& args,
+  Result PerformDefaultAction(GTEST_RVALUE_REF_(ArgumentTuple) args,
                               const string& call_description) const {
     const OnCallSpec<F>* const spec =
         this->FindOnCallSpec(args);
     if (spec != NULL) {
-      return spec->GetAction().Perform(args);
+      return spec->GetAction().Perform(::testing::internal::move(args));
     }
     const string message = call_description +
         "\n    The mock function has no default action "
@@ -1521,11 +1526,11 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // action fails.  The caller is responsible for deleting the result.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformDefaultAction(
-      const void* untyped_args,  // must point to an ArgumentTuple
+      void* untyped_args,  // must point to an ArgumentTuple
       const string& call_description) const {
-    const ArgumentTuple& args =
-        *static_cast<const ArgumentTuple*>(untyped_args);
-    return ResultHolder::PerformDefaultAction(this, args, call_description);
+    ArgumentTuple& args =
+        *static_cast<ArgumentTuple*>(untyped_args);
+	return ResultHolder::PerformDefaultAction(this, ::testing::internal::move(args), call_description);
   }
 
   // Performs the given action with the given arguments and returns
@@ -1533,13 +1538,13 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // result.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformAction(
-      const void* untyped_action, const void* untyped_args) const {
+      const void* untyped_action, void* untyped_args) const {
     // Make a copy of the action before performing it, in case the
     // action deletes the mock object (and thus deletes itself).
     const Action<F> action = *static_cast<const Action<F>*>(untyped_action);
-    const ArgumentTuple& args =
-        *static_cast<const ArgumentTuple*>(untyped_args);
-    return ResultHolder::PerformAction(action, args);
+    ArgumentTuple& args =
+        *static_cast<ArgumentTuple*>(untyped_args);
+	return ResultHolder::PerformAction(action, ::testing::internal::move(args));
   }
 
   // Implements UntypedFunctionMockerBase::ClearDefaultActionsLocked():
@@ -1579,7 +1584,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // Returns the result of invoking this mock function with the given
   // arguments.  This function can be safely called from multiple
   // threads concurrently.
-  Result InvokeWith(const ArgumentTuple& args)
+  Result InvokeWith(GTEST_RVALUE_REF_(ArgumentTuple) args)
         GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     scoped_ptr<ResultHolder> holder(
         DownCast_<ResultHolder*>(this->UntypedInvokeWith(&args)));
@@ -1608,7 +1613,10 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     TypedExpectation<F>* const expectation =
         new TypedExpectation<F>(this, file, line, source_text, m);
     const linked_ptr<ExpectationBase> untyped_expectation(expectation);
-    untyped_expectations_.push_back(untyped_expectation);
+    {
+      MutexLock l(&g_gmock_mutex);
+      untyped_expectations_.push_back(untyped_expectation);
+    }
 
     // Adds this expectation into the implicit sequence if there is one.
     Sequence* const implicit_sequence = g_gmock_implicit_sequence.get();

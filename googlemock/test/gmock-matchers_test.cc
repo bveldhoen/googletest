@@ -167,7 +167,7 @@ class GreaterThanMatcher : public MatcherInterface<int> {
     *os << "is > " << rhs_;
   }
 
-  virtual bool MatchAndExplain(int lhs,
+  virtual bool MatchAndExplain(const int& lhs,
                                MatchResultListener* listener) const {
     const int diff = lhs - rhs_;
     if (diff > 0) {
@@ -256,7 +256,7 @@ TEST(MatchResultListenerTest, IsInterestedWorks) {
 // change.
 class EvenMatcherImpl : public MatcherInterface<int> {
  public:
-  virtual bool MatchAndExplain(int x,
+  virtual bool MatchAndExplain(const int& x,
                                MatchResultListener* /* listener */) const {
     return x % 2 == 0;
   }
@@ -279,7 +279,7 @@ TEST(MatcherInterfaceTest, CanBeImplementedUsingPublishedAPI) {
 
 class NewEvenMatcherImpl : public MatcherInterface<int> {
  public:
-  virtual bool MatchAndExplain(int x, MatchResultListener* listener) const {
+  virtual bool MatchAndExplain(const int& x, MatchResultListener* listener) const {
     const bool match = x % 2 == 0;
     // Verifies that we can stream to a listener directly.
     *listener << "value % " << 2;
@@ -536,9 +536,8 @@ TEST(MatcherCastTest, FromPolymorphicMatcher) {
 // For testing casting matchers between compatible types.
 class IntValue {
  public:
-  // An int can be statically (although not implicitly) cast to a
-  // IntValue.
-  explicit IntValue(int a_value) : value_(a_value) {}
+  // An int can be statically cast to an IntValue.
+  IntValue(int a_value) : value_(a_value) {}
 
   int value() const { return value_; }
  private:
@@ -3842,9 +3841,9 @@ TEST(ResultOfTest, WorksForNonReferenceResults) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f(x)
 // returns a reference to non-const.
-double& DoubleFunction(double& input) { return input; }  // NOLINT
+const double& DoubleFunction(const double& input) { return input; }  // NOLINT
 
-Uncopyable& RefUncopyableFunction(Uncopyable& obj) {  // NOLINT
+const Uncopyable& RefUncopyableFunction(const Uncopyable& obj) {  // NOLINT
   return obj;
 }
 
@@ -5487,8 +5486,8 @@ TEST(PointwiseTest, WorksForRhsNativeArray) {
 
 TEST(PointwiseTest, WorksForRhsInitializerList) {
   const vector<int> lhs{2, 4, 6};
-  EXPECT_THAT(lhs, Pointwise(Gt(), {1, 2, 3}));
-  EXPECT_THAT(lhs, Not(Pointwise(Lt(), {3, 3, 7})));
+  EXPECT_THAT(lhs, Pointwise(Gt(), vector<int>{1, 2, 3}));
+  EXPECT_THAT(lhs, Not(Pointwise(Lt(), vector<int>{3, 3, 7})));
 }
 
 #endif  // GTEST_HAS_STD_INITIALIZER_LIST_
@@ -5598,8 +5597,8 @@ TEST(UnorderedPointwiseTest, WorksForRhsNativeArray) {
 
 TEST(UnorderedPointwiseTest, WorksForRhsInitializerList) {
   const vector<int> lhs{2, 4, 6};
-  EXPECT_THAT(lhs, UnorderedPointwise(Gt(), {5, 1, 3}));
-  EXPECT_THAT(lhs, Not(UnorderedPointwise(Lt(), {1, 1, 7})));
+  EXPECT_THAT(lhs, UnorderedPointwise(Gt(), vector<int>{5, 1, 3}));
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Lt(), vector<int>{1, 1, 7})));
 }
 
 #endif  // GTEST_HAS_STD_INITIALIZER_LIST_

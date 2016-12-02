@@ -336,7 +336,7 @@ class ActionInterface {
   // action can have side effects and be stateful.  For example, a
   // get-the-next-element-from-the-collection action will need to
   // remember the current element.
-  virtual Result Perform(const ArgumentTuple& args) = 0;
+  virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) = 0;
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionInterface);
@@ -384,7 +384,7 @@ class Action {
   // another concrete action, not that the concrete action it binds to
   // cannot change state.  (Think of the difference between a const
   // pointer and a pointer to const.)
-  Result Perform(const ArgumentTuple& args) const {
+  Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) const {
     internal::Assert(
         !IsDoDefault(), __FILE__, __LINE__,
         "You are using DoDefault() inside a composite action like "
@@ -392,7 +392,7 @@ class Action {
         "reasons.  Please instead spell out the default action, or "
         "assign the default action to an Action variable and use "
         "the variable in various places.");
-    return impl_->Perform(args);
+    return impl_->Perform(::testing::internal::move(args));
   }
 
  private:
@@ -412,7 +412,7 @@ class Action {
 //   class FooAction {
 //    public:
 //     template <typename Result, typename ArgumentTuple>
-//     Result Perform(const ArgumentTuple& args) const {
+//     Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) const {
 //       // Processes the arguments and returns a result, using
 //       // tr1::get<N>(args) to get the N-th (0-based) argument in the tuple.
 //     }
@@ -442,8 +442,8 @@ class PolymorphicAction {
 
     explicit MonomorphicImpl(const Impl& impl) : impl_(impl) {}
 
-    virtual Result Perform(const ArgumentTuple& args) {
-      return impl_.template Perform<Result>(args);
+    virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) {
+      return impl_.template Perform<Result>(::testing::internal::move(args));
     }
 
    private:
@@ -488,8 +488,8 @@ class ActionAdaptor : public ActionInterface<F1> {
 
   explicit ActionAdaptor(const Action<F2>& from) : impl_(from.impl_) {}
 
-  virtual Result Perform(const ArgumentTuple& args) {
-    return impl_->Perform(args);
+  virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) {
+    return impl_->Perform(::testing::internal::move(args));
   }
 
  private:
@@ -576,7 +576,7 @@ class ReturnAction {
         : value_before_cast_(*value),
           value_(ImplicitCast_<Result>(value_before_cast_)) {}
 
-    virtual Result Perform(const ArgumentTuple&) { return value_; }
+    virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple)) { return value_; }
 
    private:
     GTEST_COMPILE_ASSERT_(!is_reference<Result>::value,
@@ -600,7 +600,7 @@ class ReturnAction {
     explicit Impl(const linked_ptr<R>& wrapper)
         : performed_(false), wrapper_(wrapper) {}
 
-    virtual Result Perform(const ArgumentTuple&) {
+    virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple)) {
       GTEST_CHECK_(!performed_)
           << "A ByMove() action should only be performed once.";
       performed_ = true;
@@ -626,7 +626,7 @@ class ReturnNullAction {
   // this is enforced by returning nullptr, and in non-C++11 by asserting a
   // pointer type on compile time.
   template <typename Result, typename ArgumentTuple>
-  static Result Perform(const ArgumentTuple&) {
+  static Result Perform(GTEST_RVALUE_REF_(ArgumentTuple)) {
 #if GTEST_LANG_CXX11
     return nullptr;
 #else
@@ -642,7 +642,7 @@ class ReturnVoidAction {
  public:
   // Allows Return() to be used in any void-returning function.
   template <typename Result, typename ArgumentTuple>
-  static void Perform(const ArgumentTuple&) {
+  static void Perform(GTEST_RVALUE_REF_(ArgumentTuple)) {
     CompileAssertTypesEqual<void, Result>();
   }
 };
@@ -679,7 +679,7 @@ class ReturnRefAction {
 
     explicit Impl(T& ref) : ref_(ref) {}  // NOLINT
 
-    virtual Result Perform(const ArgumentTuple&) {
+    virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple)) {
       return ref_;
     }
 
@@ -728,7 +728,7 @@ class ReturnRefOfCopyAction {
 
     explicit Impl(const T& value) : value_(value) {}  // NOLINT
 
-    virtual Result Perform(const ArgumentTuple&) {
+    virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple)) {
       return value_;
     }
 
@@ -760,7 +760,7 @@ class AssignAction {
   AssignAction(T1* ptr, T2 value) : ptr_(ptr), value_(value) {}
 
   template <typename Result, typename ArgumentTuple>
-  void Perform(const ArgumentTuple& /* args */) const {
+  void Perform(GTEST_RVALUE_REF_(ArgumentTuple) /* args */) const {
     *ptr_ = value_;
   }
 
@@ -782,7 +782,7 @@ class SetErrnoAndReturnAction {
       : errno_(errno_value),
         result_(result) {}
   template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) const {
+  Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) /* args */) const {
     errno = errno_;
     return result_;
   }
@@ -808,7 +808,7 @@ class SetArgumentPointeeAction {
   explicit SetArgumentPointeeAction(const A& value) : value_(value) {}
 
   template <typename Result, typename ArgumentTuple>
-  void Perform(const ArgumentTuple& args) const {
+  void Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) const {
     CompileAssertTypesEqual<void, Result>();
     *::testing::get<N>(args) = value_;
   }
@@ -831,7 +831,7 @@ class SetArgumentPointeeAction<N, Proto, true> {
   }
 
   template <typename Result, typename ArgumentTuple>
-  void Perform(const ArgumentTuple& args) const {
+  void Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) const {
     CompileAssertTypesEqual<void, Result>();
     ::testing::get<N>(args)->CopyFrom(*proto_);
   }
@@ -858,7 +858,7 @@ class InvokeWithoutArgsAction {
   // Allows InvokeWithoutArgs(f) to be used as any action whose type is
   // compatible with f.
   template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple&) { return function_impl_(); }
+  Result Perform(GTEST_RVALUE_REF_(ArgumentTuple)) { return function_impl_(); }
 
  private:
   FunctionImpl function_impl_;
@@ -874,7 +874,7 @@ class InvokeMethodWithoutArgsAction {
       : obj_ptr_(obj_ptr), method_ptr_(method_ptr) {}
 
   template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple&) const {
+  Result Perform(GTEST_RVALUE_REF_(ArgumentTuple)) const {
     return (obj_ptr_->*method_ptr_)();
   }
 
@@ -918,9 +918,9 @@ class IgnoreResultAction {
 
     explicit Impl(const A& action) : action_(action) {}
 
-    virtual void Perform(const ArgumentTuple& args) {
+    virtual void Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) {
       // Performs the action and ignores its result.
-      action_.Perform(args);
+      action_.Perform(::testing::internal::move(args));
     }
 
    private:
@@ -949,6 +949,8 @@ class IgnoreResultAction {
 template <typename T>
 class ReferenceWrapper {
  public:
+  typedef T StoredType;
+
   // Constructs a ReferenceWrapper<T> object from a T&.
   explicit ReferenceWrapper(T& l_value) : pointer_(&l_value) {}  // NOLINT
 
@@ -993,9 +995,10 @@ class DoBothAction {
     Impl(const Action<VoidResult>& action1, const Action<F>& action2)
         : action1_(action1), action2_(action2) {}
 
-    virtual Result Perform(const ArgumentTuple& args) {
-      action1_.Perform(args);
-      return action2_.Perform(args);
+    virtual Result Perform(GTEST_RVALUE_REF_(ArgumentTuple) args) {
+      ArgumentTuple argsCopy(args);
+      action1_.Perform(::testing::internal::move(args));
+	  return action2_.Perform(::testing::internal::move(argsCopy));
     }
 
    private:

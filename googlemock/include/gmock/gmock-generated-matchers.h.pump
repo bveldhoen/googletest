@@ -114,7 +114,7 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   explicit ArgsMatcherImpl(const InnerMatcher& inner_matcher)
       : inner_matcher_(SafeMatcherCast<const SelectedArgs&>(inner_matcher)) {}
 
-  virtual bool MatchAndExplain(ArgsTuple args,
+  virtual bool MatchAndExplain(const GTEST_REMOVE_REFERENCE_AND_CONST_(ArgsTuple)& args,
                                MatchResultListener* listener) const {
     const SelectedArgs& selected_args = GetSelectedArgs(args);
     if (!listener->IsInterested())
@@ -629,7 +629,7 @@ $var param_field_decls2 = [[$for j
       [[$if i==1 [[explicit ]]]]gmock_Impl($impl_ctor_param_list)\
           $impl_inits {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -663,7 +663,7 @@ $var param_field_decls2 = [[$for j
   }\$template
   template <typename arg_type>\
   bool $class_name$param_types::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      const GTEST_REMOVE_REFERENCE_AND_CONST_(arg_type)& arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 ]]
