@@ -43,6 +43,7 @@
 #endif  // GTEST_OS_WINDOWS
 
 #include <map>
+#include <memory>
 #include <string>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -630,8 +631,8 @@ TEST(MockFunctionTest, MoveableParameterTest) {
     return 3;
   }));
   EXPECT_EQ(3, foo.Call(std::unique_ptr<int>(new int(5))));
-  EXPECT_CALL(foo, Call(_)).WillOnce(Invoke([](std::unique_ptr<int> x) {
-    return *x;
+  EXPECT_CALL(foo, Call(_)).WillOnce(Invoke([](std::unique_ptr<int> _x) {
+    return *_x;
   }));
   EXPECT_EQ(4, foo.Call(std::unique_ptr<int>(new int(4))));
 }

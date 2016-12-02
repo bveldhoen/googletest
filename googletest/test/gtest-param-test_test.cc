@@ -857,8 +857,8 @@ TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
                         CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
-                        [](const ::testing::TestParamInfo<std::string>& info) {
-                          return info.param;
+                        [](const ::testing::TestParamInfo<std::string>& _info) {
+                          return _info.param;
                         });
 
 #endif  // GTEST_LANG_CXX11

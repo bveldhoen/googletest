@@ -58,7 +58,7 @@ else:
   STACK_TRACE_TEMPLATE = ''
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+<testsuites tests="21" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
@@ -69,7 +69,7 @@ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 To be equal to: 2%(stack)s]]></failure>
     </testcase>
   </testsuite>
-  <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" errors="0" time="*">
+  <testsuite name="MixedResultTest" tests="2" failures="1" disabled="1" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="MixedResultTest"/>
     <testcase name="Fails" status="run" time="*" classname="MixedResultTest">
       <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 1&#x0A;To be equal to: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
@@ -79,7 +79,6 @@ To be equal to: 2%(stack)s]]></failure>
       Expected: 2
 To be equal to: 3%(stack)s]]></failure>
     </testcase>
-    <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
   </testsuite>
   <testsuite name="XmlQuotingTest" tests="1" failures="1" disabled="0" errors="0" time="*">
     <testcase name="OutputsCData" status="run" time="*" classname="XmlQuotingTest">
@@ -95,9 +94,7 @@ Failed
 Invalid characters in brackets []%(stack)s]]></failure>
     </testcase>
   </testsuite>
-  <testsuite name="DisabledTest" tests="1" failures="0" disabled="1" errors="0" time="*">
-    <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>
-  </testsuite>
+  <testsuite name="DisabledTest" tests="0" failures="0" disabled="1" errors="0" time="*"/>
   <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
     <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest" key_1="1"/>
     <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest" key_int="1"/>
