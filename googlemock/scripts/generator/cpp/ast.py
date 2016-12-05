@@ -221,6 +221,10 @@ class Parameter(Node):
         # TODO(nnorwitz): handle namespaces, etc.
         return self.type.name == node.name
 
+    def stringifyWithoutDefault(self):
+        typeName = self.type.stringifyType()
+        return typeName + ' ' + self.name;
+
     def __str__(self):
         name = str(self.type)
         suffix = '%s %s' % (name, self.name)
@@ -315,6 +319,10 @@ class Union(_NestedType):
 
 
 class Enum(_NestedType):
+    pass
+
+
+class EnumClass(_NestedType):
     pass
 
 
@@ -427,13 +435,13 @@ class Type(_GenericDeclaration):
         self.pointer = pointer
         self.array = array
 
-    def __str__(self):
+    def stringifyType(self):
         prefix = ''
         if self.modifiers:
             prefix = ' '.join(self.modifiers) + ' '
         name = str(self.name)
         if self.templated_types:
-            name += '<%s>' % self.templated_types
+            name += '<' + ','.join(map(lambda tt: tt.stringifyType(), self.templated_types)) + '>'
         suffix = prefix + name
         if self.reference:
             suffix += '&'
@@ -441,7 +449,10 @@ class Type(_GenericDeclaration):
             suffix += '*'
         if self.array:
             suffix += '[]'
-        return self._TypeStringHelper(suffix)
+        return suffix;
+
+    def __str__(self):
+        return self._TypeStringHelper(self.stringifyType()
 
     # By definition, Is* are always False.  A Type can only exist in
     # some sort of variable declaration, parameter, or return value.
@@ -740,6 +751,19 @@ class AstBuilder(object):
             if (keywords.IsKeyword(token.name) and
                 not keywords.IsBuiltinType(token.name)):
                 method = getattr(self, 'handle_' + token.name)
+                nm = token.name
+                if (token.name == "enum"):
+                    # take a look at the next token. If that is a class or a struct
+                    # an enum class is detected. Otherwise put the token back.
+                    # The test (not isBuiltInType()) is true for other keywords such as union f.i.
+                    # The generation would fail in that case since only the methods
+                    # handle_enum_class/struct are available.
+                    next = self._GetNextToken()
+                    if (not keywords.IsBuiltinType(next.name)):
+                        nm = nm + "_" + next.name
+                    else:
+                        self._AddBackToken(next)
+                method = getattr(self, 'handle_' + nm)
                 return method()
             elif token.name == self.in_class_name_only:
                 # The token name is the same as the class, must be a ctor if
@@ -1265,6 +1289,12 @@ class AstBuilder(object):
 
     def handle_enum(self):
         return self._GetNestedType(Enum)
+
+    def handle_enum_class(self):
+        return self._GetNestedType(EnumClass)
+
+    def handle_enum_struct(self):
+        return self._GetNestedType(EnumClass)
 
     def handle_auto(self):
         # TODO(nnorwitz): warn about using auto?  Probably not since it
