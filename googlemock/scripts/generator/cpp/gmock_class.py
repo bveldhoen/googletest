@@ -103,20 +103,25 @@ def _GenerateMethods(output_lines, source, class_node):
         # TODO(nnorwitz@google.com): Investigate whether it is possible to
         # preserve parameter name when reconstructing parameter text from
         # the AST.
-        if len([param for param in node.parameters if param.default]) > 0:
-          args = ', '.join(param.type.name for param in node.parameters)
-        else:
-          # Get the full text of the parameters from the start
-          # of the first parameter to the end of the last parameter.
-          start = node.parameters[0].start
-          end = node.parameters[-1].end
-          # Remove // comments.
-          args_strings = re.sub(r'//.*', '', source[start:end])
-          # Condense multiple spaces and eliminate newlines putting the
-          # parameters together on a single line.  Ensure there is a
-          # space in an argument which is split by a newline without
-          # intervening whitespace, e.g.: int\nBar
-          args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
+        #if len([param for param in node.parameters if param.default]) > 0:
+        #  args = ', '.join(param.type.name for param in node.parameters)
+        #else:
+        #  # Get the full text of the parameters from the start
+        #  # of the first parameter to the end of the last parameter.
+        #  start = node.parameters[0].start
+        #  end = node.parameters[-1].end
+        #  # Remove // comments.
+        #  args_strings = re.sub(r'//.*', '', source[start:end])
+        #  # Condense multiple spaces and eliminate newlines putting the
+        #  # parameters together on a single line.  Ensure there is a
+        #  # space in an argument which is split by a newline without
+        #  # intervening whitespace, e.g.: int\nBar
+        #  args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
+
+        # Use the AST to reconstruct the method parameters.
+        # Default parameters are added as normal parameters.
+        # This functionality is genmock specific!
+        args = ', '.join(param.stringifyWithoutDefault() for param in node.parameters)
 
       # Create the mock method definition.
       output_lines.extend(['%s%s(%s,' % (indent, mock_method_macro, node.name),
